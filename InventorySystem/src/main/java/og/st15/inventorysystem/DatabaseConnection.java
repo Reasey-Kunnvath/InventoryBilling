@@ -14,12 +14,8 @@ public class DatabaseConnection {
     private static final String USER = "postgres"; // Replace with your DB username
     private static final String PASSWORD = "123"; // Replace with your DB password
 
-    public static void main(String[] args) {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASSWORD)) {
-            System.out.println("Connected to PostgreSQL successfully!");
-        } catch (SQLException e) {
-            System.err.println("Connection failed: " + e.getMessage());
-        }
+    public static Connection getConnection() throws SQLException {
+        return DriverManager.getConnection(URL, USER, PASSWORD);
     }
     
 //    public static Connection getConnection() throws SQLException {
