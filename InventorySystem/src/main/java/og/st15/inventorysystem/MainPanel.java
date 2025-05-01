@@ -7,6 +7,8 @@ package og.st15.inventorysystem;
 import java.sql.PreparedStatement;
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import java.util.ArrayList;
 import java.sql.Connection;
@@ -21,14 +23,30 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 public class MainPanel extends javax.swing.JFrame {
 
     public String username;
+    public String SKU;
+    public String pName;
+    public int pPrice;
+    public String pImg;
 
-    private static final String URL = "jdbc:postgresql://localhost:5432/Inventory"; // Replace with your DB details
-    private static final String USER = "postgres"; // Replace with your DB username
-    private static final String PASSWORD = "123"; // Replace with your DB password
+    public boolean UpdateMode = false;
+
+    private static final String URL = "jdbc:postgresql://localhost:5432/Inventory";
+    private static final String USER = "postgres";
+    private static final String PASSWORD = "123";
     private int numCards;
 
     public MainPanel() {
         initComponents();
+    }
+
+    public MainPanel(String SKU, String Name, int Price, String img) {
+        initComponents();
+        this.SKU = SKU;
+        this.pName = Name;
+        this.pPrice = Price;
+        this.pImg = img;
+//        JOptionPane.showMessageDialog(this, this.pName + this.pPrice);
+        updateFields(this.SKU, this.pName, this.pPrice, this.pImg);
     }
 
     public MainPanel(String username) {
@@ -39,8 +57,14 @@ public class MainPanel extends javax.swing.JFrame {
         productPanel.setAutoscrolls(true);
         this.username = username;
         this.msg.setText("Welcome back " + this.username + "!");
+        toggleControls(false);
+        btnSaveProduct.setVisible(false);
+        btnCancel.setVisible(false);
+        btnUploadImg.setVisible(false);
 
-        this.disableControls();
+        btnUpdateCancel.setVisible(false);
+        btnUpdateProduct.setVisible(false);
+        btnDeleteProduct.setVisible(false);
     }
 
     public void setupProductCards() {
@@ -53,6 +77,30 @@ public class MainPanel extends javax.swing.JFrame {
         // Loop through products and add cards to the container
         for (ProductCard card : cards) {
             cardContainer.add(card);
+
+            card.addMouseListener(new MouseAdapter() {
+                @Override
+                public void mouseClicked(MouseEvent evt) {
+                    MainPanel mp = new MainPanel(SKU, pName, pPrice, pImg);
+                    toggleControls(true);
+                    btnUpdateCancel.setVisible(true);
+                    btnUpdateProduct.setVisible(true);
+                    btnDeleteProduct.setVisible(true);
+                    btnUploadImg.setVisible(true);
+                    imageName.setVisible(true);
+                    
+                    btnSaveProduct.setVisible(false);
+                    btnCancel.setVisible(false);
+                    
+                    txtAddPName.setText(card.Name);
+                    txtAddPPrice.setText(Integer.toString(card.Price));
+                    txtAddPSku.setText(card.SKU);
+                    imageName.setText(card.img);
+
+                    UpdateMode = true;
+                }
+            });
+
         }
 
         // Calculate the preferred size dynamically
@@ -84,7 +132,7 @@ public class MainPanel extends javax.swing.JFrame {
             ResultSet rs = stmt.executeQuery(query);
 
             while (rs.next()) {
-                String sku = "SKU00" + rs.getString("sku");
+                String sku = rs.getString("sku");
                 String name = rs.getString("product_name");
                 int price = rs.getInt("product_price");
                 String img = rs.getString("image");
@@ -125,6 +173,9 @@ public class MainPanel extends javax.swing.JFrame {
         lblAddPName = new javax.swing.JLabel();
         btnUploadImg = new javax.swing.JButton();
         imageName = new javax.swing.JLabel();
+        btnUpdateProduct = new javax.swing.JButton();
+        btnDeleteProduct = new javax.swing.JButton();
+        btnUpdateCancel = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
         msg = new javax.swing.JLabel();
         btnCancel1 = new javax.swing.JButton();
@@ -192,6 +243,30 @@ public class MainPanel extends javax.swing.JFrame {
         jPanel1.add(btnUploadImg, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 200, -1, -1));
         jPanel1.add(imageName, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 230, -1, -1));
 
+        btnUpdateProduct.setText("Update");
+        btnUpdateProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateProductActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnUpdateProduct, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 200, -1, -1));
+
+        btnDeleteProduct.setText("Delete");
+        btnDeleteProduct.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnDeleteProductActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnDeleteProduct, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 200, -1, -1));
+
+        btnUpdateCancel.setText("Cancel");
+        btnUpdateCancel.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnUpdateCancelActionPerformed(evt);
+            }
+        });
+        jPanel1.add(btnUpdateCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 230, -1, -1));
+
         ProductMgmt.addTab("Manage Products", jPanel1);
         ProductMgmt.addTab("Create Invoice", jPanel2);
 
@@ -213,40 +288,42 @@ public class MainPanel extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    public void updateFields(String SKU, String Name, int Price, String img) {
+//        txtAddPName.setText(Name);
+//        JOptionPane.showMessageDialog(productPanel, txtAddPName.getText());
+    }
+
     private void btnAddNewProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnAddNewProductActionPerformed
-        lblAddPSku.setVisible(true);
-        txtAddPSku.setVisible(true);
-        lblAddPName.setVisible(true);
-        txtAddPName.setVisible(true);
-        lblAddPPrice.setVisible(true);
-        txtAddPPrice.setVisible(true);
+        toggleControls(true);
         btnSaveProduct.setVisible(true);
         btnCancel.setVisible(true);
         btnUploadImg.setVisible(true);
+        
+        btnUpdateCancel.setVisible(false);
+        btnUpdateProduct.setVisible(false);
+        btnDeleteProduct.setVisible(false);
+       
+        
+        txtAddPName.setText("");
+        txtAddPPrice.setText("");
+        txtAddPSku.setText("");
+        imageName.setText("");
     }//GEN-LAST:event_btnAddNewProductActionPerformed
 
     private void btnCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCancelActionPerformed
-        lblAddPSku.setVisible(false);
-        txtAddPSku.setVisible(false);
-        lblAddPName.setVisible(false);
-        txtAddPName.setVisible(false);
-        lblAddPPrice.setVisible(false);
-        txtAddPPrice.setVisible(false);
+        toggleControls(false);
         btnSaveProduct.setVisible(false);
         btnCancel.setVisible(false);
         btnUploadImg.setVisible(false);
     }//GEN-LAST:event_btnCancelActionPerformed
 
-    public void disableControls() {
-        lblAddPSku.setVisible(false);
-        txtAddPSku.setVisible(false);
-        lblAddPName.setVisible(false);
-        txtAddPName.setVisible(false);
-        lblAddPPrice.setVisible(false);
-        txtAddPPrice.setVisible(false);
-        btnSaveProduct.setVisible(false);
-        btnCancel.setVisible(false);
-        btnUploadImg.setVisible(false);
+    public void toggleControls(boolean status) {
+        lblAddPSku.setVisible(status);
+        txtAddPSku.setVisible(status);
+        lblAddPName.setVisible(status);
+        txtAddPName.setVisible(status);
+        lblAddPPrice.setVisible(status);
+        txtAddPPrice.setVisible(status);
     }
 
     private void btnSaveProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnSaveProductActionPerformed
@@ -264,7 +341,11 @@ public class MainPanel extends javax.swing.JFrame {
             pstmt.setString(4, imageName.getText());
             pstmt.executeUpdate();
             setupProductCards();
-            disableControls();
+            toggleControls(false);
+
+            btnSaveProduct.setVisible(false);
+            btnCancel.setVisible(false);
+            btnUploadImg.setVisible(false);
         } catch (SQLException e) {
             e.printStackTrace();
 //            // For demo purposes, add some mock data if DB fails
@@ -288,6 +369,23 @@ public class MainPanel extends javax.swing.JFrame {
             imageName.setText(chooser.getSelectedFile().getName());
         }
     }//GEN-LAST:event_btnUploadImgActionPerformed
+
+    private void btnUpdateProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateProductActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnUpdateProductActionPerformed
+
+    private void btnDeleteProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteProductActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnDeleteProductActionPerformed
+
+    private void btnUpdateCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCancelActionPerformed
+        toggleControls(false);
+        btnUpdateProduct.setVisible(false);
+        btnDeleteProduct.setVisible(false);
+        btnUpdateCancel.setVisible(false);
+        btnUploadImg.setVisible(false);
+        imageName.setVisible(false);
+    }//GEN-LAST:event_btnUpdateCancelActionPerformed
 
     /**
      * @param args the command line arguments
@@ -329,7 +427,10 @@ public class MainPanel extends javax.swing.JFrame {
     private javax.swing.JButton btnAddNewProduct;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCancel1;
+    private javax.swing.JButton btnDeleteProduct;
     private javax.swing.JButton btnSaveProduct;
+    private javax.swing.JButton btnUpdateCancel;
+    private javax.swing.JButton btnUpdateProduct;
     private javax.swing.JButton btnUploadImg;
     private javax.swing.JPanel cardContainer;
     private javax.swing.JLabel imageName;
