@@ -41,6 +41,9 @@ public class MainPanel extends javax.swing.JFrame {
 
     public MainPanel(String SKU, String Name, int Price, String img) {
         initComponents();
+        
+        
+
 
         this.SKU = SKU;
         this.pName = Name;
@@ -54,8 +57,10 @@ public class MainPanel extends javax.swing.JFrame {
         initComponents();
 
         cardContainer.setLayout(new GridLayout(0, 4, 10, 10));
+        productContainer.setLayout(new GridLayout(0, 4, 10, 10));
 //        productPanel.setViewportView(cardContainer);
         productPanel.setAutoscrolls(true);
+        productPanel2.setAutoscrolls(true);
         this.username = username;
         this.msg.setText("Welcome back " + this.username + "!");
         toggleControls(false);
@@ -69,16 +74,14 @@ public class MainPanel extends javax.swing.JFrame {
     }
 
     public void setupProductCards() {
-        // Clear the container
         cardContainer.removeAll();
+        productContainer.removeAll();
 
-        // Fetch products from the database
         List<ProductCard> cards = fetchProductsFromDatabase();
+        List<ProductCard> cards1 = fetchProductsFromDatabase();
 
-        // Loop through products and add cards to the container
         for (ProductCard card : cards) {
             cardContainer.add(card);
-
             card.addMouseListener(new MouseAdapter() {
                 @Override
                 public void mouseClicked(MouseEvent evt) {
@@ -102,10 +105,12 @@ public class MainPanel extends javax.swing.JFrame {
                     UpdateMode = true;
                 }
             });
-
         }
 
-        // Calculate the preferred size dynamically
+        for (ProductCard card1 : cards1) {
+            productContainer.add(card1);
+        }
+
         int cardWidth = 170;
         int cardHeight = 250;
         int gap = 10;
@@ -120,6 +125,11 @@ public class MainPanel extends javax.swing.JFrame {
         int totalHeight = numRows * (cardHeight + gap) + gap;
 
         cardContainer.setPreferredSize(new Dimension(
+                containerWidth,
+                totalHeight
+        ));
+
+        productContainer.setPreferredSize(new Dimension(
                 containerWidth,
                 totalHeight
         ));
@@ -179,13 +189,28 @@ public class MainPanel extends javax.swing.JFrame {
         btnDeleteProduct = new javax.swing.JButton();
         btnUpdateCancel = new javax.swing.JButton();
         jPanel2 = new javax.swing.JPanel();
+        productPanel2 = new javax.swing.JScrollPane();
+        productContainer = new javax.swing.JPanel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel1 = new javax.swing.JLabel();
+        btnCheckout = new javax.swing.JButton();
         msg = new javax.swing.JLabel();
         btnCancel1 = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
-        setMinimumSize(new java.awt.Dimension(1200, 740));
-        setPreferredSize(new java.awt.Dimension(1200, 740));
+        setMinimumSize(new java.awt.Dimension(1090, 740));
+        setPreferredSize(new java.awt.Dimension(1090, 740));
+        setResizable(false);
         getContentPane().setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        ProductMgmt.setBackground(new java.awt.Color(51, 102, 255));
+        ProductMgmt.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        ProductMgmt.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                ProductMgmtMouseClicked(evt);
+            }
+        });
 
         jPanel1.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
 
@@ -200,6 +225,7 @@ public class MainPanel extends javax.swing.JFrame {
 
         jPanel1.add(productPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 800, 630));
 
+        btnAddNewProduct.setBackground(new java.awt.Color(82, 115, 255));
         btnAddNewProduct.setText("Add New Product");
         btnAddNewProduct.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -270,9 +296,34 @@ public class MainPanel extends javax.swing.JFrame {
         jPanel1.add(btnUpdateCancel, new org.netbeans.lib.awtextra.AbsoluteConstraints(990, 230, -1, -1));
 
         ProductMgmt.addTab("Manage Products", jPanel1);
+
+        jPanel2.setLayout(new org.netbeans.lib.awtextra.AbsoluteLayout());
+
+        productContainer.setBackground(new java.awt.Color(153, 153, 153));
+        productPanel2.setViewportView(productContainer);
+
+        jPanel2.add(productPanel2, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 800, 630));
+
+        jScrollPane2.setViewportView(jPanel4);
+
+        jPanel2.add(jScrollPane2, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 40, 260, 380));
+
+        jLabel1.setFont(new java.awt.Font("Segoe UI", 0, 14)); // NOI18N
+        jLabel1.setText("Cart List:");
+        jPanel2.add(jLabel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 20, -1, -1));
+
+        btnCheckout.setBackground(new java.awt.Color(112, 130, 255));
+        btnCheckout.setText("Checkout");
+        btnCheckout.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                btnCheckoutActionPerformed(evt);
+            }
+        });
+        jPanel2.add(btnCheckout, new org.netbeans.lib.awtextra.AbsoluteConstraints(810, 430, 260, 30));
+
         ProductMgmt.addTab("Create Invoice", jPanel2);
 
-        getContentPane().add(ProductMgmt, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 1110, 680));
+        getContentPane().add(ProductMgmt, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 60, 1080, 680));
         ProductMgmt.getAccessibleContext().setAccessibleName("Manage Product");
 
         msg.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
@@ -288,6 +339,7 @@ public class MainPanel extends javax.swing.JFrame {
         getContentPane().add(btnCancel1, new org.netbeans.lib.awtextra.AbsoluteConstraints(920, 200, -1, -1));
 
         pack();
+        setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
     public void updateFields(String SKU, String Name, int Price, String img) {
@@ -429,6 +481,14 @@ public class MainPanel extends javax.swing.JFrame {
         imageName.setVisible(false);
     }//GEN-LAST:event_btnUpdateCancelActionPerformed
 
+    private void ProductMgmtMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ProductMgmtMouseClicked
+//        JOptionPane.showMessageDialog(this, "NIGGERSs");
+    }//GEN-LAST:event_ProductMgmtMouseClicked
+
+    private void btnCheckoutActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnCheckoutActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_btnCheckoutActionPerformed
+
     /**
      * @param args the command line arguments
      */
@@ -469,6 +529,7 @@ public class MainPanel extends javax.swing.JFrame {
     private javax.swing.JButton btnAddNewProduct;
     private javax.swing.JButton btnCancel;
     private javax.swing.JButton btnCancel1;
+    private javax.swing.JButton btnCheckout;
     private javax.swing.JButton btnDeleteProduct;
     private javax.swing.JButton btnSaveProduct;
     private javax.swing.JButton btnUpdateCancel;
@@ -476,13 +537,18 @@ public class MainPanel extends javax.swing.JFrame {
     private javax.swing.JButton btnUploadImg;
     private javax.swing.JPanel cardContainer;
     private javax.swing.JLabel imageName;
+    private javax.swing.JLabel jLabel1;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
+    private javax.swing.JPanel jPanel4;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JLabel lblAddPName;
     private javax.swing.JLabel lblAddPPrice;
     private javax.swing.JLabel lblAddPSku;
     private javax.swing.JLabel msg;
+    private javax.swing.JPanel productContainer;
     private javax.swing.JScrollPane productPanel;
+    private javax.swing.JScrollPane productPanel2;
     private javax.swing.JTextField txtAddPName;
     private javax.swing.JTextField txtAddPPrice;
     private javax.swing.JTextField txtAddPSku;
