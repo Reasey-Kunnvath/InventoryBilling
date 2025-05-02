@@ -41,6 +41,7 @@ public class MainPanel extends javax.swing.JFrame {
 
     public MainPanel(String SKU, String Name, int Price, String img) {
         initComponents();
+
         this.SKU = SKU;
         this.pName = Name;
         this.pPrice = Price;
@@ -52,7 +53,7 @@ public class MainPanel extends javax.swing.JFrame {
     public MainPanel(String username) {
         initComponents();
 
-        cardContainer.setLayout(new GridLayout(0, 4, 5, 5));
+        cardContainer.setLayout(new GridLayout(0, 4, 10, 10));
 //        productPanel.setViewportView(cardContainer);
         productPanel.setAutoscrolls(true);
         this.username = username;
@@ -83,15 +84,16 @@ public class MainPanel extends javax.swing.JFrame {
                 public void mouseClicked(MouseEvent evt) {
                     MainPanel mp = new MainPanel(SKU, pName, pPrice, pImg);
                     toggleControls(true);
+                    txtAddPSku.setEnabled(false);
                     btnUpdateCancel.setVisible(true);
                     btnUpdateProduct.setVisible(true);
                     btnDeleteProduct.setVisible(true);
                     btnUploadImg.setVisible(true);
                     imageName.setVisible(true);
-                    
+
                     btnSaveProduct.setVisible(false);
                     btnCancel.setVisible(false);
-                    
+
                     txtAddPName.setText(card.Name);
                     txtAddPPrice.setText(Integer.toString(card.Price));
                     txtAddPSku.setText(card.SKU);
@@ -196,7 +198,7 @@ public class MainPanel extends javax.swing.JFrame {
         cardContainer.setPreferredSize(new java.awt.Dimension(100, 2));
         productPanel.setViewportView(cardContainer);
 
-        jPanel1.add(productPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(10, 10, 780, 630));
+        jPanel1.add(productPanel, new org.netbeans.lib.awtextra.AbsoluteConstraints(0, 10, 800, 630));
 
         btnAddNewProduct.setText("Add New Product");
         btnAddNewProduct.addActionListener(new java.awt.event.ActionListener() {
@@ -298,12 +300,11 @@ public class MainPanel extends javax.swing.JFrame {
         btnSaveProduct.setVisible(true);
         btnCancel.setVisible(true);
         btnUploadImg.setVisible(true);
-        
+
         btnUpdateCancel.setVisible(false);
         btnUpdateProduct.setVisible(false);
         btnDeleteProduct.setVisible(false);
-       
-        
+
         txtAddPName.setText("");
         txtAddPPrice.setText("");
         txtAddPSku.setText("");
@@ -318,6 +319,7 @@ public class MainPanel extends javax.swing.JFrame {
     }//GEN-LAST:event_btnCancelActionPerformed
 
     public void toggleControls(boolean status) {
+        txtAddPSku.setEnabled(true);
         lblAddPSku.setVisible(status);
         txtAddPSku.setVisible(status);
         lblAddPName.setVisible(status);
@@ -346,6 +348,8 @@ public class MainPanel extends javax.swing.JFrame {
             btnSaveProduct.setVisible(false);
             btnCancel.setVisible(false);
             btnUploadImg.setVisible(false);
+            imageName.setVisible(false);
+            imageName.setText("");
         } catch (SQLException e) {
             e.printStackTrace();
 //            // For demo purposes, add some mock data if DB fails
@@ -371,11 +375,49 @@ public class MainPanel extends javax.swing.JFrame {
     }//GEN-LAST:event_btnUploadImgActionPerformed
 
     private void btnUpdateProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateProductActionPerformed
-        // TODO add your handling code here:
+
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            String query = "UPDATE products SET product_name = ?, product_price = ?, image = ? WHERE sku = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, txtAddPName.getText());
+            pstmt.setInt(2, Integer.parseInt(txtAddPPrice.getText()));
+            pstmt.setString(3, imageName.getText());
+            pstmt.setString(4, txtAddPSku.getText());
+            pstmt.executeUpdate();
+            setupProductCards();
+            toggleControls(false);
+
+            btnUpdateCancel.setVisible(false);
+            btnUpdateProduct.setVisible(false);
+            btnUpdateCancel.setVisible(false);
+            btnDeleteProduct.setVisible(false);
+            btnUploadImg.setVisible(false);
+            imageName.setVisible(false);
+            imageName.setText("");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_btnUpdateProductActionPerformed
 
     private void btnDeleteProductActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnDeleteProductActionPerformed
-        // TODO add your handling code here:
+        try (Connection conn = DriverManager.getConnection(URL, USER, PASSWORD)) {
+            String query = "DELETE FROM products WHERE sku = ?";
+            PreparedStatement pstmt = conn.prepareStatement(query);
+            pstmt.setString(1, txtAddPSku.getText());
+            pstmt.executeUpdate();
+            setupProductCards();
+            toggleControls(false);
+
+            btnUpdateCancel.setVisible(false);
+            btnUpdateProduct.setVisible(false);
+            btnUpdateCancel.setVisible(false);
+            btnDeleteProduct.setVisible(false);
+            btnUploadImg.setVisible(false);
+            imageName.setVisible(false);
+            imageName.setText("");
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }//GEN-LAST:event_btnDeleteProductActionPerformed
 
     private void btnUpdateCancelActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_btnUpdateCancelActionPerformed
