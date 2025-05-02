@@ -11,6 +11,7 @@ import java.io.File;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -18,9 +19,12 @@ import javax.swing.JLabel;
  */
 public class ProductCard extends javax.swing.JPanel {
 
-    private String SKU;
-    private String Name;
-    private int Price;
+    public String SKU;
+    public String Name;
+    public int Price;
+    public String img;
+    
+    
 
     public ProductCard() {
         initComponents();
@@ -28,8 +32,15 @@ public class ProductCard extends javax.swing.JPanel {
 
     public ProductCard(String SKU, String Name, int Price, String img) {
         initComponents();
+       
+        
+        this.SKU = SKU;
+        this.Name = Name;
+        this.Price = Price;
+        this.img = img;
+        
         this.lblName.setText(Name);
-        this.lblSku.setText(SKU);
+        this.lblSku.setText("SKU00" + SKU);
         this.lblPrice.setText(Integer.toString(Price) + "$");
 
         try {
@@ -63,6 +74,12 @@ public class ProductCard extends javax.swing.JPanel {
         lblName = new javax.swing.JLabel();
         lblSku = new javax.swing.JLabel();
         jImage = new javax.swing.JLabel();
+
+        addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                formMouseClicked(evt);
+            }
+        });
 
         lblPrice.setFont(new java.awt.Font("Segoe UI", 1, 14)); // NOI18N
         lblPrice.setForeground(new java.awt.Color(0, 153, 0));
@@ -106,11 +123,16 @@ public class ProductCard extends javax.swing.JPanel {
         );
     }// </editor-fold>//GEN-END:initComponents
 
+    private void formMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_formMouseClicked
+//        JOptionPane.showMessageDialog(this, SKU);
+        MainPanel mp = new MainPanel(SKU, Name, Price, img);
+    }//GEN-LAST:event_formMouseClicked
+
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel jImage;
-    private javax.swing.JLabel lblName;
-    private javax.swing.JLabel lblPrice;
-    private javax.swing.JLabel lblSku;
+    public javax.swing.JLabel jImage;
+    public javax.swing.JLabel lblName;
+    public javax.swing.JLabel lblPrice;
+    public javax.swing.JLabel lblSku;
     // End of variables declaration//GEN-END:variables
 }
